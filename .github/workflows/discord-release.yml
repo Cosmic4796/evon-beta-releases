@@ -1,0 +1,53 @@
+name: Discord Release Notification
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord Notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          # Get release info
+          RELEASE_NAME="${{ github.event.release.name }}"
+          RELEASE_TAG="${{ github.event.release.tag_name }}"
+          RELEASE_URL="${{ github.event.release.html_url }}"
+          RELEASE_BODY="${{ github.event.release.body }}"
+          DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/${RELEASE_TAG}/EVONLauncher.exe"
+
+          # Escape special characters for JSON
+          RELEASE_BODY=$(echo "$RELEASE_BODY" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+
+          # Send to Discord with custom avatar
+          curl -H "Content-Type: application/json" \
+            -d "{
+              \"username\": \"EVON Beta\",
+              \"avatar_url\": \"https://avatars.githubusercontent.com/u/127627689?v=4\",
+              \"embeds\": [{
+                \"title\": \"${RELEASE_NAME}\",
+                \"url\": \"${RELEASE_URL}\",
+                \"description\": \"${RELEASE_BODY}\",
+                \"color\": 5814783,
+                \"fields\": [
+                  {
+                    \"name\": \"Download\",
+                    \"value\": \"[EVONLauncher.exe](${DOWNLOAD_URL})\",
+                    \"inline\": true
+                  },
+                  {
+                    \"name\": \"Version\",
+                    \"value\": \"\`${RELEASE_TAG}\`\",
+                    \"inline\": true
+                  }
+                ],
+                \"footer\": {
+                  \"text\": \"EVON Beta Releases\"
+                },
+                \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+              }]
+            }" \
+            $DISCORD_WEBHOOK
