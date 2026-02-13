@@ -26,7 +26,7 @@ jobs:
           curl -H "Content-Type: application/json" \
             -d "{
               \"username\": \"EVON Beta\",
-              \"avatar_url\": \"https://avatars.githubusercontent.com/u/127627689?v=4\",
+              \"avatar_url\": \"https://raw.githubusercontent.com/Cosmic4796/evon-releases/main/icon.png\",
               \"embeds\": [{
                 \"title\": \"${RELEASE_NAME}\",
                 \"url\": \"${RELEASE_URL}\",
