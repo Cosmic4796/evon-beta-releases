@@ -8,7 +8,8 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
-      - name: Send Discord Notification
+      # Step 1: Send detailed notification to Beta channel (for Premium users)
+      - name: Send Beta Channel Notification (Detailed)
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
@@ -22,32 +23,60 @@ jobs:
           # Escape special characters for JSON
           RELEASE_BODY=$(echo "$RELEASE_BODY" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
 
-          # Send to Discord with custom avatar
+          # Send detailed notification to Beta channel
           curl -H "Content-Type: application/json" \
             -d "{
               \"username\": \"EVON Beta\",
               \"avatar_url\": \"https://raw.githubusercontent.com/Cosmic4796/evon-releases/main/icon.png\",
               \"embeds\": [{
-                \"title\": \"${RELEASE_NAME}\",
+                \"title\": \"🚀 ${RELEASE_NAME}\",
                 \"url\": \"${RELEASE_URL}\",
                 \"description\": \"${RELEASE_BODY}\",
                 \"color\": 5814783,
                 \"fields\": [
                   {
-                    \"name\": \"Download\",
+                    \"name\": \"📥 Download\",
                     \"value\": \"[EVONLauncher.exe](${DOWNLOAD_URL})\",
                     \"inline\": true
                   },
                   {
-                    \"name\": \"Version\",
+                    \"name\": \"🏷️ Version\",
                     \"value\": \"\`${RELEASE_TAG}\`\",
                     \"inline\": true
                   }
                 ],
                 \"footer\": {
-                  \"text\": \"EVON Beta Releases\"
+                  \"text\": \"EVON Beta • Premium Early Access\"
                 },
                 \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
               }]
             }" \
             $DISCORD_WEBHOOK
+
+      # Step 2: Send teaser notification to Main channel (for everyone)
+      - name: Send Main Channel Notification (Teaser)
+        env:
+          DISCORD_WEBHOOK_MAIN: ${{ secrets.DISCORD_WEBHOOK_MAIN }}
+        run: |
+          # Send vague teaser to main updates channel
+          curl -H "Content-Type: application/json" \
+            -d '{
+              "username": "EVON Updates",
+              "avatar_url": "https://raw.githubusercontent.com/Cosmic4796/evon-releases/main/icon.png",
+              "embeds": [{
+                "title": "🔥 New Hotfixes & Features in Development!",
+                "description": "We have been working on some exciting updates including bug fixes and performance improvements.\n\n**Want early access?** Premium members get beta releases before everyone else!",
+                "color": 15844367,
+                "fields": [
+                  {
+                    "name": "🎁 Get Premium",
+                    "value": "Purchase the EVON gamepass for early access to new features!",
+                    "inline": false
+                  }
+                ],
+                "footer": {
+                  "text": "EVON Obfuscator • Coming Soon to Everyone"
+                }
+              }]
+            }' \
+            $DISCORD_WEBHOOK_MAIN
