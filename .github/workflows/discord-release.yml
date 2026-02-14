@@ -17,7 +17,7 @@ jobs:
           RELEASE_URL="${{ github.event.release.html_url }}"
           DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/${RELEASE_TAG}/EVON_Obfuscator_x64-setup.exe"
 
-          cat > payload.json << EOFPAYLOAD
+          cat > payload.json << 'EOFPAYLOAD'
           {
             "username": "EVON Beta",
             "avatar_url": "https://raw.githubusercontent.com/Cosmic4796/evon-releases/main/icon.png",
@@ -30,24 +30,24 @@ jobs:
               "color": 5814783,
               "fields": [
                 {
-                  "name": "📥 Download",
-                  "value": "[EVON_Obfuscator_x64-setup.exe](DOWNLOAD_PLACEHOLDER)",
+                  "name": "Download",
+                  "value": "[Click here to download](DOWNLOAD_PLACEHOLDER)",
                   "inline": true
                 },
                 {
-                  "name": "🏷️ Version",
-                  "value": "`TAG_PLACEHOLDER`",
+                  "name": "Version",
+                  "value": "TAG_PLACEHOLDER",
                   "inline": true
                 }
               ],
               "footer": {
-                "text": "EVON Beta • Premium Early Access"
+                "text": "EVON Beta - Premium Early Access"
               }
             }]
           }
           EOFPAYLOAD
 
-          sed -i "s|TITLE_PLACEHOLDER|🚀 ${RELEASE_NAME}|g" payload.json
+          sed -i "s|TITLE_PLACEHOLDER|${RELEASE_NAME}|g" payload.json
           sed -i "s|URL_PLACEHOLDER|${RELEASE_URL}|g" payload.json
           sed -i "s|DOWNLOAD_PLACEHOLDER|${DOWNLOAD_URL}|g" payload.json
           sed -i "s|TAG_PLACEHOLDER|${RELEASE_TAG}|g" payload.json
@@ -59,25 +59,25 @@ jobs:
         env:
           DISCORD_WEBHOOK_MAIN: ${{ secrets.DISCORD_WEBHOOK_MAIN }}
         run: |
-          cat > teaser.json << EOFTEASER
+          cat > teaser.json << 'EOFTEASER'
           {
             "username": "EVON Updates",
             "avatar_url": "https://raw.githubusercontent.com/Cosmic4796/evon-releases/main/icon.png",
             "embeds": [{
-              "title": "🔥 New Hotfixes & Features in Development!",
+              "title": "New Hotfixes and Features in Development!",
               "description": "We have been working on some exciting updates including bug fixes and performance improvements.
 
 **Want early access?** Premium members get beta releases before everyone else!",
               "color": 15844367,
               "fields": [
                 {
-                  "name": "🎁 Get Premium",
+                  "name": "Get Premium",
                   "value": "Purchase the EVON gamepass for early access to new features!",
                   "inline": false
                 }
               ],
               "footer": {
-                "text": "EVON Obfuscator • Coming Soon to Everyone"
+                "text": "EVON Obfuscator - Coming Soon to Everyone"
               }
             }]
           }
