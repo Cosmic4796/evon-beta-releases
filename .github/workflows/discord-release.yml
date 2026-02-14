@@ -15,7 +15,7 @@ jobs:
           RELEASE_NAME="${{ github.event.release.name }}"
           RELEASE_TAG="${{ github.event.release.tag_name }}"
           RELEASE_URL="${{ github.event.release.html_url }}"
-          DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/${RELEASE_TAG}/EVON_Obfuscator_x64-setup.exe"
+          DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/${RELEASE_TAG}/EVONLauncher.exe"
 
           cat > payload.json << 'EOFPAYLOAD'
           {
@@ -26,12 +26,12 @@ jobs:
               "url": "URL_PLACEHOLDER",
               "description": "A new beta version is available for premium users!
 
-**Download the installer to get started.**",
+**Download EVONLauncher.exe to get started.**",
               "color": 5814783,
               "fields": [
                 {
                   "name": "Download",
-                  "value": "[Click here to download](DOWNLOAD_PLACEHOLDER)",
+                  "value": "[EVONLauncher.exe](DOWNLOAD_PLACEHOLDER)",
                   "inline": true
                 },
                 {
