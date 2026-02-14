@@ -2,81 +2,85 @@ name: Discord Release Notification
 
 on:
   release:
-    types: [published]
+    types: [published, prereleased]
 
 jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Send detailed notification to Beta channel (for Premium users)
-      - name: Send Beta Channel Notification (Detailed)
+      - name: Send Beta Channel Notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
-          # Get release info
           RELEASE_NAME="${{ github.event.release.name }}"
           RELEASE_TAG="${{ github.event.release.tag_name }}"
           RELEASE_URL="${{ github.event.release.html_url }}"
-          RELEASE_BODY="${{ github.event.release.body }}"
-          DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/${RELEASE_TAG}/EVONLauncher.exe"
+          DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/${RELEASE_TAG}/EVON_Obfuscator_x64-setup.exe"
 
-          # Escape special characters for JSON
-          RELEASE_BODY=$(echo "$RELEASE_BODY" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+          cat > payload.json << EOFPAYLOAD
+          {
+            "username": "EVON Beta",
+            "avatar_url": "https://raw.githubusercontent.com/Cosmic4796/evon-releases/main/icon.png",
+            "embeds": [{
+              "title": "TITLE_PLACEHOLDER",
+              "url": "URL_PLACEHOLDER",
+              "description": "A new beta version is available for premium users!
 
-          # Send detailed notification to Beta channel
-          curl -H "Content-Type: application/json" \
-            -d "{
-              \"username\": \"EVON Beta\",
-              \"avatar_url\": \"https://raw.githubusercontent.com/Cosmic4796/evon-releases/main/icon.png\",
-              \"embeds\": [{
-                \"title\": \"🚀 ${RELEASE_NAME}\",
-                \"url\": \"${RELEASE_URL}\",
-                \"description\": \"${RELEASE_BODY}\",
-                \"color\": 5814783,
-                \"fields\": [
-                  {
-                    \"name\": \"📥 Download\",
-                    \"value\": \"[EVONLauncher.exe](${DOWNLOAD_URL})\",
-                    \"inline\": true
-                  },
-                  {
-                    \"name\": \"🏷️ Version\",
-                    \"value\": \"\`${RELEASE_TAG}\`\",
-                    \"inline\": true
-                  }
-                ],
-                \"footer\": {
-                  \"text\": \"EVON Beta • Premium Early Access\"
+**Download the installer to get started.**",
+              "color": 5814783,
+              "fields": [
+                {
+                  "name": "📥 Download",
+                  "value": "[EVON_Obfuscator_x64-setup.exe](DOWNLOAD_PLACEHOLDER)",
+                  "inline": true
                 },
-                \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
-              }]
-            }" \
-            $DISCORD_WEBHOOK
+                {
+                  "name": "🏷️ Version",
+                  "value": "`TAG_PLACEHOLDER`",
+                  "inline": true
+                }
+              ],
+              "footer": {
+                "text": "EVON Beta • Premium Early Access"
+              }
+            }]
+          }
+          EOFPAYLOAD
 
-      # Step 2: Send teaser notification to Main channel (for everyone)
-      - name: Send Main Channel Notification (Teaser)
+          sed -i "s|TITLE_PLACEHOLDER|🚀 ${RELEASE_NAME}|g" payload.json
+          sed -i "s|URL_PLACEHOLDER|${RELEASE_URL}|g" payload.json
+          sed -i "s|DOWNLOAD_PLACEHOLDER|${DOWNLOAD_URL}|g" payload.json
+          sed -i "s|TAG_PLACEHOLDER|${RELEASE_TAG}|g" payload.json
+
+          curl -s -H "Content-Type: application/json" -d @payload.json $DISCORD_WEBHOOK
+          echo "Beta notification sent!"
+
+      - name: Send Main Channel Teaser
         env:
           DISCORD_WEBHOOK_MAIN: ${{ secrets.DISCORD_WEBHOOK_MAIN }}
         run: |
-          # Send vague teaser to main updates channel
-          curl -H "Content-Type: application/json" \
-            -d '{
-              "username": "EVON Updates",
-              "avatar_url": "https://raw.githubusercontent.com/Cosmic4796/evon-releases/main/icon.png",
-              "embeds": [{
-                "title": "🔥 New Hotfixes & Features in Development!",
-                "description": "We have been working on some exciting updates including bug fixes and performance improvements.\n\n**Want early access?** Premium members get beta releases before everyone else!",
-                "color": 15844367,
-                "fields": [
-                  {
-                    "name": "🎁 Get Premium",
-                    "value": "Purchase the EVON gamepass for early access to new features!",
-                    "inline": false
-                  }
-                ],
-                "footer": {
-                  "text": "EVON Obfuscator • Coming Soon to Everyone"
+          cat > teaser.json << EOFTEASER
+          {
+            "username": "EVON Updates",
+            "avatar_url": "https://raw.githubusercontent.com/Cosmic4796/evon-releases/main/icon.png",
+            "embeds": [{
+              "title": "🔥 New Hotfixes & Features in Development!",
+              "description": "We have been working on some exciting updates including bug fixes and performance improvements.
+
+**Want early access?** Premium members get beta releases before everyone else!",
+              "color": 15844367,
+              "fields": [
+                {
+                  "name": "🎁 Get Premium",
+                  "value": "Purchase the EVON gamepass for early access to new features!",
+                  "inline": false
                 }
-              }]
-            }' \
-            $DISCORD_WEBHOOK_MAIN
+              ],
+              "footer": {
+                "text": "EVON Obfuscator • Coming Soon to Everyone"
+              }
+            }]
+          }
+          EOFTEASER
+          curl -s -H "Content-Type: application/json" -d @teaser.json $DISCORD_WEBHOOK_MAIN
+          echo "Main channel teaser sent!"
